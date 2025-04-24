@@ -1,6 +1,6 @@
 [project]
 name = "hinaturedb-client"
-version = "0.0.1"
+version = "0.0.2"
 description = "Client library for HinatureDB server"
 readme = "README.md"
 authors = [{ name = "Zhengyi Dong", email = "dong@shanshui.org" }]
