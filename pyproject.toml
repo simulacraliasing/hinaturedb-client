@@ -43,7 +43,7 @@ allow_zero_version = true
 repo_dir = "/home/hinature/hinaturedb/sdks/hinaturedb-client"
 no_git_verify = false
 tag_format = "v{version}"
-version_toml = ["pyproject.toml:porject.version"]
+version_toml = ["pyproject.toml:project.version"]
 
 [tool.semantic_release.branches.main]
 match = "(main|master)"
@@ -51,7 +51,6 @@ prerelease_token = "rc"
 prerelease = false
 
 [tool.semantic_release.changelog]
-changelog_file = ""
 exclude_commit_patterns = []
 mode = "init"
 insertion_flag = "<!-- version list -->"
