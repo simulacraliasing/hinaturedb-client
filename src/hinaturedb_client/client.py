@@ -1,5 +1,5 @@
 import datetime
-from logging import get_logger
+from logging import getLogger
 from typing import Dict, List
 from urllib.parse import urljoin
 from uuid import UUID
@@ -7,7 +7,7 @@ from uuid import UUID
 from httpx import AsyncClient, ConnectError, ConnectTimeout, HTTPStatusError, ReadTimeout, Timeout
 from tenacity import RetryCallState, retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
-logger = get_logger(__name__)
+logger = getLogger(__name__)
 
 
 def log_retry_attempt(retry_state: RetryCallState) -> None:
