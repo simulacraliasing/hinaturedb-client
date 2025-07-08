@@ -1,8 +1,6 @@
 import logging
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from tenacity import RetryCallState
+from tenacity import RetryCallState
 
 logger = logging.getLogger(__name__)
 

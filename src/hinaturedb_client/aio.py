@@ -1,3 +1,4 @@
+import base64
 import datetime
 import logging
 from typing import Any
@@ -5,6 +6,9 @@ from urllib.parse import urljoin
 from uuid import UUID
 
 from httpx import AsyncClient, ConnectError, ConnectTimeout, HTTPStatusError, ReadTimeout
+from pybind11_geobuf import Decoder, Encoder
+from shapely import to_geojson  # type: ignore
+from shapely.geometry.base import BaseGeometry  # type: ignore
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from .utils import log_retry_attempt
@@ -19,6 +23,8 @@ class AsyncHinatureDBClient:
         self.server_password = password
         self.hn_token = None
         self.http_client = http_client
+        self.geobuf_encoder = Encoder()
+        self.geobuf_decoder = Decoder()
 
     async def refresh_token(self):
         if self.hn_token is None:
@@ -83,7 +89,7 @@ class AsyncHinatureDBClient:
             return data["data"]
         else:
             raise Exception("Failed to fetch record")
-    
+
     @retry(
         stop=stop_after_attempt(3),  # Retry up to 3 times
         wait=wait_exponential(multiplier=1, min=2, max=10),  # Wait 2s, 4s, 8s... up to 10s
@@ -98,7 +104,7 @@ class AsyncHinatureDBClient:
         dataset_id: UUID | None = None,
         external_ids: list[str] | None = None,
         kingdom: str | None = None,
-        location: str | None = None,
+        location: str | BaseGeometry | None = None,
         distance: int | None = None,
         update_min: int | None = None,
         update_max: int | None = None,
@@ -127,7 +133,12 @@ class AsyncHinatureDBClient:
         if kingdom:
             payload["kingdom"] = kingdom
         if location:
-            payload["location"] = location
+            if isinstance(location, BaseGeometry):
+                location_geojson = to_geojson(location)
+                location_b64_geobuf = base64.b64encode(self.geobuf_encoder.encode(location_geojson)).decode("utf-8")
+                payload["location"] = location_b64_geobuf
+            else:
+                payload["location"] = location
         if distance:
             payload["distance"] = distance
         if update_min:

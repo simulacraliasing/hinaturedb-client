@@ -1,17 +1,15 @@
 import base64
 import datetime
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from urllib.parse import urljoin
 from uuid import UUID
 
 from httpx import Client, ConnectError, ConnectTimeout, HTTPStatusError, ReadTimeout
 from pybind11_geobuf import Decoder, Encoder
 from shapely import to_geojson  # type: ignore
+from shapely.geometry.base import BaseGeometry
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
-
-if TYPE_CHECKING:
-    from shapely.geometry.base import BaseGeometry
 
 from .utils import log_retry_attempt
 
