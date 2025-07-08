@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.1.3 (2025-07-08)
+
+### Bug Fixes
+
+- :bug: typing check import not defined
+  ([`f5469a2`](https://github.com/simulacraliasing/hinaturedb-client/commit/f5469a29c488de5bc1345b4bceb36a22bccbcaec))
+
+
 ## v0.1.2 (2025-07-08)
 
 ### Bug Fixes
