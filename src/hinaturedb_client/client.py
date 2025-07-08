@@ -7,7 +7,7 @@ from uuid import UUID
 
 from httpx import Client, ConnectError, ConnectTimeout, HTTPStatusError, ReadTimeout
 from pybind11_geobuf import Decoder, Encoder
-from shapely import to_geojson  # type: ignore
+from shapely import from_geojson, to_geojson  # type: ignore
 from shapely.geometry.base import BaseGeometry  # type: ignore
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
@@ -25,6 +25,12 @@ class HinatureDBClient:
         self.http_client = http_client
         self.geobuf_encoder = Encoder()
         self.geobuf_decoder = Decoder()
+
+    def _decode_geobuf(self, b64_geobuf_str: str):
+        geobuf_bytes = base64.b64decode(b64_geobuf_str)
+        geojson_str = self.geobuf_decoder.decode(geobuf_bytes)  # type: ignore
+        geometry = from_geojson(geojson_str)
+        return geometry
 
     def refresh_token(self):
         if self.hn_token is None:
@@ -97,7 +103,7 @@ class HinatureDBClient:
         reraise=True,  # Reraise the exception if all retries fail
         before_sleep=log_retry_attempt,
     )
-    def get_records(
+    def search_records(
         self,
         cursor: str | None = None,
         page_size: int = 50,
@@ -161,7 +167,7 @@ class HinatureDBClient:
         data = res.json()
         return data
 
-    def get_all_records(
+    def search_all_records(
         self,
         page_size: int = 50,
         taxon_id: str | None = None,
@@ -178,7 +184,7 @@ class HinatureDBClient:
         records: list[dict[str, Any]] = []
         cursor = None
         while True:
-            data = self.get_records(
+            data = self.search_records(
                 cursor=cursor,
                 page_size=page_size,
                 taxon_id=taxon_id,
@@ -200,8 +206,14 @@ class HinatureDBClient:
                     break
                 else:
                     cursor = data.get("cursor")
-
-        return records
+        record_results: list[dict[str, Any]] = []
+        if geom:
+            for record in records:
+                record["geom"] = from_geojson(record["geom"])
+                record_results.append(record)
+        else:
+            record_results = records
+        return record_results
 
     @retry(
         stop=stop_after_attempt(3),  # Retry up to 3 times
