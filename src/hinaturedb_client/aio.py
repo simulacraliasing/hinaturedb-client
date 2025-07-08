@@ -100,6 +100,7 @@ class AsyncHinatureDBClient:
     async def get_records(
         self,
         cursor: str | None = None,
+        page_size: int = 50,
         taxon_id: str | None = None,
         dataset_id: UUID | None = None,
         external_ids: list[str] | None = None,
@@ -124,7 +125,7 @@ class AsyncHinatureDBClient:
             payload["page_size"] = len(external_ids)
         else:
             # Otherwise, use a default page size.
-            payload["page_size"] = 50
+            payload["page_size"] = page_size
         if taxon_id:
             payload["taxonID"] = taxon_id
         if dataset_id:
@@ -159,6 +160,7 @@ class AsyncHinatureDBClient:
 
     async def get_all_records(
         self,
+        page_size: int = 50,
         taxon_id: str | None = None,
         dataset_id: UUID | None = None,
         external_ids: list[str] | None = None,
@@ -175,6 +177,7 @@ class AsyncHinatureDBClient:
         while True:
             data = await self.get_records(
                 cursor=cursor,
+                page_size=page_size,
                 taxon_id=taxon_id,
                 dataset_id=dataset_id,
                 external_ids=external_ids,

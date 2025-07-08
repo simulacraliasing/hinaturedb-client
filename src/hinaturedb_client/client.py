@@ -8,7 +8,7 @@ from uuid import UUID
 from httpx import Client, ConnectError, ConnectTimeout, HTTPStatusError, ReadTimeout
 from pybind11_geobuf import Decoder, Encoder
 from shapely import to_geojson  # type: ignore
-from shapely.geometry.base import BaseGeometry
+from shapely.geometry.base import BaseGeometry  # type: ignore
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from .utils import log_retry_attempt
@@ -100,6 +100,7 @@ class HinatureDBClient:
     def get_records(
         self,
         cursor: str | None = None,
+        page_size: int = 50,
         taxon_id: str | None = None,
         dataset_id: UUID | None = None,
         external_ids: list[str] | None = None,
@@ -124,7 +125,7 @@ class HinatureDBClient:
             payload["page_size"] = len(external_ids)
         else:
             # Otherwise, use a default page size.
-            payload["page_size"] = 50
+            payload["page_size"] = page_size
         # Add other optional parameters to the payload if they are provided.
         # Note: I'm assuming the API payload keys match the argument names.
         # Adjust the keys (e.g., "taxonID", "datasetID") as needed.
@@ -162,6 +163,7 @@ class HinatureDBClient:
 
     def get_all_records(
         self,
+        page_size: int = 50,
         taxon_id: str | None = None,
         dataset_id: UUID | None = None,
         external_ids: list[str] | None = None,
@@ -178,6 +180,7 @@ class HinatureDBClient:
         while True:
             data = self.get_records(
                 cursor=cursor,
+                page_size=page_size,
                 taxon_id=taxon_id,
                 dataset_id=dataset_id,
                 external_ids=external_ids,
