@@ -154,6 +154,7 @@ class HinatureDBClient:
             "Authorization": f"Bearer {self.hn_token}",
             "Cache-Control": "no-store",
         }
+        logger.debug("Fetching records from %s with payload: %s", url, payload)
         res = self.http_client.post(url, json=payload, headers=headers, timeout=30)
         res.raise_for_status()
         data = res.json()
