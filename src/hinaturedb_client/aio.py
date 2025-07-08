@@ -145,7 +145,7 @@ class AsyncHinatureDBClient:
         data = res.json()
         return data
 
-    async def ge_all_records(
+    async def get_all_records(
         self,
         taxon_id: str | None = None,
         dataset_id: UUID | None = None,

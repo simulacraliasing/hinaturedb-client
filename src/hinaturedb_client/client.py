@@ -1,11 +1,17 @@
+import base64
 import datetime
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 from uuid import UUID
 
 from httpx import Client, ConnectError, ConnectTimeout, HTTPStatusError, ReadTimeout
+from pybind11_geobuf import Decoder, Encoder
+from shapely import to_geojson  # type: ignore
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+
+if TYPE_CHECKING:
+    from shapely.geometry.base import BaseGeometry
 
 from .utils import log_retry_attempt
 
@@ -19,14 +25,16 @@ class HinatureDBClient:
         self.server_password = password
         self.hn_token = None
         self.http_client = http_client
+        self.geobuf_encoder = Encoder()
+        self.geobuf_decoder = Decoder()
 
-    def  refresh_token(self):
+    def refresh_token(self):
         if self.hn_token is None:
             self.get_token()
         if self.expire < int(datetime.datetime.now(datetime.timezone.utc).timestamp()):
             self.get_token()
 
-    def  get_token(self):
+    def get_token(self):
         token_url = urljoin(self.server_url, "/api/v1/token")
         payload = {"grant_type": "password", "username": self.server_username, "password": self.server_password}
         res = self.http_client.post(token_url, data=payload)
@@ -46,7 +54,7 @@ class HinatureDBClient:
         reraise=True,  # Reraise the exception if all retries fail
         before_sleep=log_retry_attempt,
     )
-    def  create_records(self, records: list[dict[str, Any]]) -> list[UUID]:
+    def create_records(self, records: list[dict[str, Any]]) -> list[UUID]:
         url = urljoin(self.server_url, "/api/v1/record_batch")
         self.refresh_token()
         headers = {
@@ -66,7 +74,7 @@ class HinatureDBClient:
         reraise=True,  # Reraise the exception if all retries fail
         before_sleep=log_retry_attempt,
     )
-    def  get_record(self, dataset_id: str, external_id: str, exact: bool = True) -> dict[str, Any] | None:
+    def get_record(self, dataset_id: str, external_id: str, exact: bool = True) -> dict[str, Any] | None:
         url = urljoin(self.server_url, "/api/v1/record")
         self.refresh_token()
         params: dict[str, str | bool] = {"dataset_id": dataset_id, "external_id": external_id, "exact": exact}
@@ -91,14 +99,14 @@ class HinatureDBClient:
         reraise=True,  # Reraise the exception if all retries fail
         before_sleep=log_retry_attempt,
     )
-    def  get_records(
+    def get_records(
         self,
         cursor: str | None = None,
         taxon_id: str | None = None,
         dataset_id: UUID | None = None,
         external_ids: list[str] | None = None,
         kingdom: str | None = None,
-        location: str | None = None,
+        location: str | BaseGeometry | None = None,
         distance: int | None = None,
         update_min: int | None = None,
         update_max: int | None = None,
@@ -130,7 +138,12 @@ class HinatureDBClient:
         if kingdom:
             payload["kingdom"] = kingdom
         if location:
-            payload["location"] = location
+            if isinstance(location, BaseGeometry):
+                location_geojson = to_geojson(location)
+                location_b64_geobuf = base64.b64encode(self.geobuf_encoder.encode(location_geojson)).decode("utf-8")
+                payload["location"] = location_b64_geobuf
+            else:
+                payload["location"] = location
         if distance:
             payload["distance"] = distance
         if update_min:
@@ -148,13 +161,13 @@ class HinatureDBClient:
         data = res.json()
         return data
 
-    def  ge_all_records(
+    def get_all_records(
         self,
         taxon_id: str | None = None,
         dataset_id: UUID | None = None,
         external_ids: list[str] | None = None,
         kingdom: str | None = None,
-        location: str | None = None,
+        location: str | BaseGeometry | None = None,
         distance: int | None = None,
         update_min: int | None = None,
         update_max: int | None = None,
@@ -195,7 +208,7 @@ class HinatureDBClient:
         reraise=True,  # Reraise the exception if all retries fail
         before_sleep=log_retry_attempt,
     )
-    def  batch_update_records(self, record_updates: list[dict[str, Any]]) -> list[UUID]:
+    def batch_update_records(self, record_updates: list[dict[str, Any]]) -> list[UUID]:
         url = urljoin(self.server_url, "/api/v1/records/batch")
         self.refresh_token()
         headers = {
@@ -227,7 +240,7 @@ class HinatureDBClient:
             raise Exception("Failed to update records: " + data["message"])
         return data["data"]
 
-    def  update_record(self, record_id: str, record: dict[str, Any]) -> UUID:
+    def update_record(self, record_id: str, record: dict[str, Any]) -> UUID:
         self.refresh_token()
         headers = {
             "Authorization": f"Bearer {self.hn_token}",
@@ -241,7 +254,7 @@ class HinatureDBClient:
         else:
             return data["data"]
 
-    def  get_dataset_id(self, name: str) -> UUID:
+    def get_dataset_id(self, name: str) -> UUID:
         self.refresh_token()
         headers = {
             "Authorization": f"Bearer {self.hn_token}",
@@ -260,7 +273,7 @@ class HinatureDBClient:
         else:
             return data["data"][0]["id"]
 
-    def  get_dataset_by_name(self, name: str) -> UUID:
+    def get_dataset_by_name(self, name: str) -> UUID:
         self.refresh_token()
         headers = {
             "Authorization": f"Bearer {self.hn_token}",

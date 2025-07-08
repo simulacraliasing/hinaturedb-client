@@ -219,10 +219,11 @@ wheels = [
 
 [[package]]
 name = "hinaturedb-client"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
+    { name = "pybind11-geobuf" },
     { name = "tenacity" },
 ]
 
@@ -245,6 +246,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
+    { name = "pybind11-geobuf", specifier = ">=0.2.3" },
     { name = "tenacity", specifier = ">=9.1.2" },
 ]
 
@@ -479,6 +481,24 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/96/2d/02d4312c973c6050a18b314a5ad0b3210edb65a906f868e31c111dede4a6/pluggy-1.5.0.tar.gz", hash = "sha256:2cffa88e94fdc978c4c574f15f9e59b7f4201d439195c3715ca9e2486f1d0cf1", size = 67955 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/88/5f/e351af9a41f866ac3f1fac4ca0613908d9a41741cfcf2228f4ad853b697d/pluggy-1.5.0-py3-none-any.whl", hash = "sha256:44e1ad92c8ca002de6377e165f3e0f1be63266ab4d554740532335b9d75ea669", size = 20556 },
+]
+
+[[package]]
+name = "pybind11-geobuf"
+version = "0.2.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d5/81/26061156e704b3d284b43db2e86cfbc90241b0d4b64b4854aef6bed47a02/pybind11_geobuf-0.2.3.tar.gz", hash = "sha256:c178fc128102a325c5e5cada2ee40dfb7acb87e6c4e00b1bd7c478e15ba8ff77", size = 3674462 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cc/cb/32a312fa5e82b469baddbc281dc9935b73118653b4c3da5b0fb2e9a419c7/pybind11_geobuf-0.2.3-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:2a493ec3465d71a33dfea24845fe472411ba692988e777366b1b43683bfa0be0", size = 2094093 },
+    { url = "https://files.pythonhosted.org/packages/db/ee/49705f6d9a5ce41c3876735e66042083427cd3edaada4d8f6ac9bc28fe94/pybind11_geobuf-0.2.3-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:f8c0952560dc3dc60a79d69c16cdc4834aa710773b4d2427a4007248a952e345", size = 1911495 },
+    { url = "https://files.pythonhosted.org/packages/10/4b/2aabf63b2e7f2fa0b18fa5b1a8a2811fab2c25df7b35396b273f26a8bb12/pybind11_geobuf-0.2.3-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d6658edfc063580ef3ace184eb07308fdeea37ef33295366aa0acfe4c9262c18", size = 2585317 },
+    { url = "https://files.pythonhosted.org/packages/c7/42/3b4acc28b90e86f0e9b563aceaf28781316b224fa65f0162c711948c2042/pybind11_geobuf-0.2.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bf99e4c9280d020023aa0d2f0484091a2bda44310b3afa932c08bd2ec2641d10", size = 2774445 },
+    { url = "https://files.pythonhosted.org/packages/2f/38/acc13293014a5aae05a3cfaf160afc0370d89be89b3759b44dcc7bf49768/pybind11_geobuf-0.2.3-cp312-cp312-win_amd64.whl", hash = "sha256:92f4598e305b9cf7d861c227d53bd2d6e03ee00961e29527f5da7d5fe78f06e2", size = 1493695 },
+    { url = "https://files.pythonhosted.org/packages/62/52/96983a9214c82824476a011221beb4da3785f5756d8b8d127e770b674198/pybind11_geobuf-0.2.3-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:d5e62a5ae3a2e202a355e7bf5ea28bfc16beb46349edaa0de110cab3772b7da6", size = 2094161 },
+    { url = "https://files.pythonhosted.org/packages/9e/c5/4dbecd73739a273bc18849a8f6b9a5f32d199f4174dd6e761c94f63fc1cf/pybind11_geobuf-0.2.3-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:23a63305e60889a25631f4bfdd12af1394a44277ffe0a033fb1a90b4fda1b832", size = 1911465 },
+    { url = "https://files.pythonhosted.org/packages/9d/ad/a37a9d3c88f6f69fb7a64f9fe7af15204deca4d396192876b3a5bbe0e4f8/pybind11_geobuf-0.2.3-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1ae808a54b5d1f6372320fa331639d2803454d23825fea203cd7d85bb8ef4870", size = 2585178 },
+    { url = "https://files.pythonhosted.org/packages/38/42/4bcb94903df5a58610845a76f6d9691c8d3ffde1c020622af792514e3d9a/pybind11_geobuf-0.2.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7b4e9bdf7236b39607da9896cb7fc156521961aaac5cf9b4587faf84027cfa33", size = 2774407 },
+    { url = "https://files.pythonhosted.org/packages/93/36/154c01e1bf201920ac9220b86ed7a55e86c86300c6cd3f9ee03f87d9bccb/pybind11_geobuf-0.2.3-cp313-cp313-win_amd64.whl", hash = "sha256:04fc1a0c4aa3d3aebf9903b7b899570fa4d3338d2a7b48256bf9558f252da699", size = 1493730 },
 ]
 
 [[package]]
