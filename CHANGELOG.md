@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.1.6 (2025-07-08)
+
+### Performance Improvements
+
+- :zap: rename method
+  ([`e106d15`](https://github.com/simulacraliasing/hinaturedb-client/commit/e106d1573b139d5ffc515e9c98e83787904a0190))
+
+
 ## v0.1.5 (2025-07-08)
 
 ### Performance Improvements
