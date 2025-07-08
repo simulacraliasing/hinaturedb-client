@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.1.0 (2025-07-08)
+
+### Features
+
+- :sparkles: seperate aio client
+  ([`6af93ec`](https://github.com/simulacraliasing/hinaturedb-client/commit/6af93ec1792876762ca68b64a12724811bf09bd9))
+
+
 ## v0.0.2 (2025-04-24)
 
 ### Bug Fixes
