@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.1.5 (2025-07-08)
+
+### Performance Improvements
+
+- :zap: add page_size param to get_records
+  ([`26c1ff8`](https://github.com/simulacraliasing/hinaturedb-client/commit/26c1ff824ce9d7c0d3b12348c168b778af1bceba))
+
+
 ## v0.1.4 (2025-07-08)
 
 ### Performance Improvements
