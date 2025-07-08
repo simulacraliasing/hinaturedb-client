@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.1.4 (2025-07-08)
+
+### Performance Improvements
+
+- :zap: add log
+  ([`312509b`](https://github.com/simulacraliasing/hinaturedb-client/commit/312509bcdbbdc86ecb8b6cbdc777903e5cb823f2))
+
+
 ## v0.1.3 (2025-07-08)
 
 ### Bug Fixes
