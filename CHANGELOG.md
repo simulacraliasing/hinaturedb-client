@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.1.1 (2025-07-08)
+
+### Build System
+
+- :heavy_minus_sign: remove hinaturedb-core dep
+  ([`a152451`](https://github.com/simulacraliasing/hinaturedb-client/commit/a15245117aff6f9d3a5bdd9c4d844111612b50ff))
+
+
 ## v0.1.0 (2025-07-08)
 
 ### Features
