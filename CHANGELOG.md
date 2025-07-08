@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.1.2 (2025-07-08)
+
+### Bug Fixes
+
+- :bug: method name typo
+  ([`46a0ed0`](https://github.com/simulacraliasing/hinaturedb-client/commit/46a0ed06d77b9358869f3a04f40725a96455c928))
+
+
 ## v0.1.1 (2025-07-08)
 
 ### Build System
