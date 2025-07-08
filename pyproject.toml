@@ -3,15 +3,20 @@ name = "hinaturedb-client"
 version = "0.0.2"
 description = "Client library for HinatureDB server"
 readme = "README.md"
-authors = [{ name = "Zhengyi Dong", email = "dong@shanshui.org" }]
+authors = [{ name = "Zhengyi Dong", email = "dongzhengyi@shanshui.org" }]
 requires-python = ">=3.12"
 dependencies = [
     "httpx>=0.28.1",
     "tenacity>=9.1.2",
+    "hinaturedb-core @ git+https://github.com/simulacraliasing/hinaturedb-core.git@v0.6.9",
 ]
 
 [dependency-groups]
-dev = ["deptry>=0.23.0", "python-semantic-release>=9.21.0"]
+dev = [
+    "deptry>=0.23.0",
+    "pandas>=2.3.0",
+ "python-semantic-release>=9.21.0",
+]
 lint = ["ruff>=0.11.5"]
 test = [
     "coverage[toml]>=7.8.0",
@@ -19,6 +24,9 @@ test = [
     "pytest-asyncio>=0.26.0",
     "pytest-mock>=3.14.0",
 ]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.ruff]
 line-length = 120

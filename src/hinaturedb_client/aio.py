@@ -4,7 +4,7 @@ from typing import Any
 from urllib.parse import urljoin
 from uuid import UUID
 
-from httpx import Client, ConnectError, ConnectTimeout, HTTPStatusError, ReadTimeout
+from httpx import AsyncClient, ConnectError, ConnectTimeout, HTTPStatusError, ReadTimeout
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from .utils import log_retry_attempt
@@ -12,24 +12,24 @@ from .utils import log_retry_attempt
 logger = logging.getLogger(__name__)
 
 
-class HinatureDBClient:
-    def __init__(self, url: str, username: str, password: str, http_client: Client = Client()):
+class AsyncHinatureDBClient:
+    def __init__(self, url: str, username: str, password: str, http_client: AsyncClient = AsyncClient()):
         self.server_url = url
         self.server_username = username
         self.server_password = password
         self.hn_token = None
         self.http_client = http_client
 
-    def  refresh_token(self):
+    async def refresh_token(self):
         if self.hn_token is None:
-            self.get_token()
+            await self.get_token()
         if self.expire < int(datetime.datetime.now(datetime.timezone.utc).timestamp()):
-            self.get_token()
+            await self.get_token()
 
-    def  get_token(self):
+    async def get_token(self):
         token_url = urljoin(self.server_url, "/api/v1/token")
         payload = {"grant_type": "password", "username": self.server_username, "password": self.server_password}
-        res = self.http_client.post(token_url, data=payload)
+        res = await self.http_client.post(token_url, data=payload)
         res.raise_for_status()
         data = res.json()
         expires_in = data["expires_in"]
@@ -46,13 +46,13 @@ class HinatureDBClient:
         reraise=True,  # Reraise the exception if all retries fail
         before_sleep=log_retry_attempt,
     )
-    def  create_records(self, records: list[dict[str, Any]]) -> list[UUID]:
+    async def create_records(self, records: list[dict[str, Any]]) -> list[UUID]:
         url = urljoin(self.server_url, "/api/v1/record_batch")
-        self.refresh_token()
+        await self.refresh_token()
         headers = {
             "Authorization": f"Bearer {self.hn_token}",
         }
-        res = self.http_client.post(url, json=records, headers=headers, timeout=30)
+        res = await self.http_client.post(url, json=records, headers=headers, timeout=30)
         res.raise_for_status()
         data = res.json()
         if not data["success"]:
@@ -66,15 +66,15 @@ class HinatureDBClient:
         reraise=True,  # Reraise the exception if all retries fail
         before_sleep=log_retry_attempt,
     )
-    def  get_record(self, dataset_id: str, external_id: str, exact: bool = True) -> dict[str, Any] | None:
+    async def get_record(self, dataset_id: str, external_id: str, exact: bool = True) -> dict[str, Any] | None:
         url = urljoin(self.server_url, "/api/v1/record")
-        self.refresh_token()
+        await self.refresh_token()
         params: dict[str, str | bool] = {"dataset_id": dataset_id, "external_id": external_id, "exact": exact}
         headers = {
             "Authorization": f"Bearer {self.hn_token}",
             "Cache-Control": "no-store",
         }
-        res = self.http_client.get(url, params=params, headers=headers, timeout=30)
+        res = await self.http_client.get(url, params=params, headers=headers, timeout=30)
         res.raise_for_status()
         data = res.json()
         if not data["success"] and data["message"] == "Record not found":
@@ -83,7 +83,7 @@ class HinatureDBClient:
             return data["data"]
         else:
             raise Exception("Failed to fetch record")
-
+    
     @retry(
         stop=stop_after_attempt(3),  # Retry up to 3 times
         wait=wait_exponential(multiplier=1, min=2, max=10),  # Wait 2s, 4s, 8s... up to 10s
@@ -91,7 +91,7 @@ class HinatureDBClient:
         reraise=True,  # Reraise the exception if all retries fail
         before_sleep=log_retry_attempt,
     )
-    def  get_records(
+    async def get_records(
         self,
         cursor: str | None = None,
         taxon_id: str | None = None,
@@ -106,7 +106,7 @@ class HinatureDBClient:
         patch: bool = False,
     ) -> dict[str, Any]:
         url = urljoin(self.server_url, "/api/v1/records/search")
-        self.refresh_token()
+        await self.refresh_token()
         payload: dict[str, Any] = {
             "geom": geom,
             "patch": patch,
@@ -119,9 +119,6 @@ class HinatureDBClient:
         else:
             # Otherwise, use a default page size.
             payload["page_size"] = 50
-        # Add other optional parameters to the payload if they are provided.
-        # Note: I'm assuming the API payload keys match the argument names.
-        # Adjust the keys (e.g., "taxonID", "datasetID") as needed.
         if taxon_id:
             payload["taxonID"] = taxon_id
         if dataset_id:
@@ -143,12 +140,12 @@ class HinatureDBClient:
             "Authorization": f"Bearer {self.hn_token}",
             "Cache-Control": "no-store",
         }
-        res = self.http_client.post(url, json=payload, headers=headers, timeout=30)
+        res = await self.http_client.post(url, json=payload, headers=headers, timeout=30)
         res.raise_for_status()
         data = res.json()
         return data
 
-    def  ge_all_records(
+    async def ge_all_records(
         self,
         taxon_id: str | None = None,
         dataset_id: UUID | None = None,
@@ -164,7 +161,7 @@ class HinatureDBClient:
         records: list[dict[str, Any]] = []
         cursor = None
         while True:
-            data = self.get_records(
+            data = await self.get_records(
                 cursor=cursor,
                 taxon_id=taxon_id,
                 dataset_id=dataset_id,
@@ -195,15 +192,15 @@ class HinatureDBClient:
         reraise=True,  # Reraise the exception if all retries fail
         before_sleep=log_retry_attempt,
     )
-    def  batch_update_records(self, record_updates: list[dict[str, Any]]) -> list[UUID]:
+    async def batch_update_records(self, record_updates: list[dict[str, Any]]) -> list[UUID]:
         url = urljoin(self.server_url, "/api/v1/records/batch")
-        self.refresh_token()
+        await self.refresh_token()
         headers = {
             "Authorization": f"Bearer {self.hn_token}",
         }
         record_updates = {"updates": record_updates}  # type: ignore
         try:
-            res = self.http_client.put(url, json=record_updates, headers=headers, timeout=30)
+            res = await self.http_client.put(url, json=record_updates, headers=headers, timeout=30)
             res.raise_for_status()
         except HTTPStatusError as e:
             error_details = "No response body."
@@ -227,13 +224,13 @@ class HinatureDBClient:
             raise Exception("Failed to update records: " + data["message"])
         return data["data"]
 
-    def  update_record(self, record_id: str, record: dict[str, Any]) -> UUID:
-        self.refresh_token()
+    async def update_record(self, record_id: str, record: dict[str, Any]) -> UUID:
+        await self.refresh_token()
         headers = {
             "Authorization": f"Bearer {self.hn_token}",
         }
         url = urljoin(self.server_url, f"/api/v1/record/{record_id}")
-        res = self.http_client.put(url, json=record, headers=headers)
+        res = await self.http_client.put(url, json=record, headers=headers)
         res.raise_for_status()
         data = res.json()
         if not data["success"]:
@@ -241,8 +238,8 @@ class HinatureDBClient:
         else:
             return data["data"]
 
-    def  get_dataset_id(self, name: str) -> UUID:
-        self.refresh_token()
+    async def get_dataset_id(self, name: str) -> UUID:
+        await self.refresh_token()
         headers = {
             "Authorization": f"Bearer {self.hn_token}",
         }
@@ -252,7 +249,7 @@ class HinatureDBClient:
             "page_size": 1,
             "name": name,
         }
-        res = self.http_client.get(url, params=params, headers=headers)
+        res = await self.http_client.get(url, params=params, headers=headers)
         res.raise_for_status()
         data = res.json()
         if not data["success"]:
@@ -260,8 +257,8 @@ class HinatureDBClient:
         else:
             return data["data"][0]["id"]
 
-    def  get_dataset_by_name(self, name: str) -> UUID:
-        self.refresh_token()
+    async def get_dataset_by_name(self, name: str) -> UUID:
+        await self.refresh_token()
         headers = {
             "Authorization": f"Bearer {self.hn_token}",
         }
@@ -271,7 +268,7 @@ class HinatureDBClient:
             "page_size": 1,
             "name": name,
         }
-        res = self.http_client.get(url, params=params, headers=headers)
+        res = await self.http_client.get(url, params=params, headers=headers)
         res.raise_for_status()
         data = res.json()
         if not data["success"]:
